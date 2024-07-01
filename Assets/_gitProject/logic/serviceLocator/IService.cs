@@ -1,3 +1,3 @@
-﻿namespace _gitProject.logic {
-    public interface IService{}
-}
+﻿    namespace _gitProject.logic.ServiceLocator {
+        public interface IService{}
+    }
