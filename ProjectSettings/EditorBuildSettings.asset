@@ -4,5 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/_gitProject/scenes/bootstrapp.unity
+    guid: 2bd44cc36cb051b47b57bd19f45710aa
+  - enabled: 1
+    path: Assets/_gitProject/scenes/gitGame.unity
+    guid: d9cc34845c626004baec67478b1428af
   m_configObjects: {}
