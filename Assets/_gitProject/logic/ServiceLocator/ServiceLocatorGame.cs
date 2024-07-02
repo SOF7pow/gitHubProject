@@ -4,10 +4,19 @@ using UnityEngine;
 namespace _gitProject.logic.ServiceLocator {
     public class ServiceLocatorGame : MonoBehaviour {
 
-        [SerializeField] private Character _character;
+        [SerializeField] private PlayerController _playerController;
         private void Awake() {
+            Register();
+            Init();
+        }
+
+        private void Register() {
             ServiceLocator.Initialize();
-            ServiceLocator.Current.Register(_character);
+            ServiceLocator.Current.Register(_playerController);
+        }
+
+        private void Init() {
+            _playerController.Init();
         }
     }
 }

@@ -1,18 +1,16 @@
-using System;
 using _gitProject.logic.Player;
-using _gitProject.logic.ServiceLocator;
 using UnityEngine;
 
-namespace Project.Cubus.Camera.scripts {
+namespace _gitProject.logic.ViewCamera {
     public class CameraFollow : MonoBehaviour {
         public Transform target;
         public float smoothSpeed = 0.125f;
         public Vector3 offset;
-
+        
         private void Start() {
-           target = ServiceLocator.Current.Get<Character>().transform;
+            target = ServiceLocator.ServiceLocator.Current.Get<PlayerController>().transform;
         }
-
+        
         private void LateUpdate() {
             if (!target) return;
             var scroll = Input.mouseScrollDelta.y * 1.1f;
