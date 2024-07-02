@@ -8,7 +8,7 @@ namespace _gitProject.logic.Player {
             _transform = transform;
             _rotateSpeed = rotateSpeed;
         }
-        public void RotateToAimDirection(Vector3 direction) {
+        public void RotateToLookDirection(Vector3 direction) {
             var angle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
             var rotateStep = _rotateSpeed * Time.deltaTime;
             _transform.rotation =

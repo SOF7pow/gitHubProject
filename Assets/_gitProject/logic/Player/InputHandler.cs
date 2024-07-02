@@ -2,48 +2,34 @@ using UnityEngine;
 
 namespace _gitProject.logic.Player {
     public class InputHandler {
-        
         private readonly Camera _camera;
         private readonly Transform _transform;
-        private readonly Movement _movement;
-        private readonly MouseLook _mouseLook;
-
+        private const float Gravity = 9.81f;
         public InputHandler
         (
-            Transform transform, 
-            Camera camera, 
-            Movement movement, 
-            MouseLook mouseLook
+            Transform transform,
+            Camera camera
         ) 
         {
             _transform = transform;
             _camera = camera;
-            _movement = movement;
-            _mouseLook = mouseLook;
         }
-        
-        public void ManualUpdate() {
-            var moveDirection = CalculateMoveDirection();
-            if (moveDirection != Vector3.zero)
-                _movement.Move(moveDirection);
-
-            var lookDirection = CalculateLookDirection();
-            _mouseLook.RotateToAimDirection(lookDirection);
+        public Vector3 CalculateMoveDirection() {
+            var right = Input.GetAxisRaw("Horizontal");
+            var forward = Input.GetAxisRaw("Vertical");
+            return new Vector3(right,0,forward).normalized;
         }
-        
-        private Vector3 CalculateMoveDirection() {
-            var horizontal = UnityEngine.Input.GetAxisRaw("Horizontal");
-            var vertical = UnityEngine.Input.GetAxisRaw("Vertical");
-            return new Vector3(horizontal, 0, vertical).normalized;
-        }
-        private Vector3 CalculateLookDirection() {
+        public Vector3 CalculateLookDirection() {
             var mousePosition =
-               _camera.ScreenToWorldPoint(new Vector3(
-                    Input.mousePosition.x, 
-                    Input.mousePosition.y, 
+                _camera.ScreenToWorldPoint(new Vector3(
+                    Input.mousePosition.x,
+                    Input.mousePosition.y,
                     _camera.transform.position.y));
             var direction = mousePosition - _transform.position;
             return direction;
         }
+
+        public bool IsJump() => Input.GetKeyDown(KeyCode.Space);
+        public bool IsShoot() => Input.GetMouseButton(0);
     }
 }
