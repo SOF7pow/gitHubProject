@@ -3,13 +3,14 @@ using UnityEngine;
 
 namespace _gitProject.logic.Player {
     public class Shoot {
+        
         private const float Distance = Mathf.Infinity;
         private float _lastAttackTime;
         private float _attackDelay;
         
         private readonly int _damage;
         private readonly Transform _muzzle;
-        private LayerMask _layer = LayerMask.NameToLayer("Damageable");
+        private readonly LayerMask _layer = LayerMask.NameToLayer("Damageable");
         
         public Shoot(Transform muzzle, int damage, float delay) {
             _muzzle = muzzle;
@@ -24,12 +25,11 @@ namespace _gitProject.logic.Player {
             var direction = _muzzle.forward;
             var position = _muzzle.position;
             var ray = new Ray(position, direction);
-            if (Physics.Raycast(ray, out var hit, Distance, ~_layer)) {
-                Debug.Log(hit.collider.name);
-                if (hit.collider.TryGetComponent(out IDamageable damageable)) {
-                    damageable.TakeDamage(_damage);
-                }
-            }
+            if (!Physics.Raycast(ray, out var hit, Distance, ~_layer)) return;
+            if (!hit.collider.TryGetComponent(out IDamageable damageable)) return;
+            
+            Debug.Log(hit.collider.name);
+            damageable.TakeDamage(_damage);
         }
         public void AttackCoolDown() {
             if (_lastAttackTime > 0) 

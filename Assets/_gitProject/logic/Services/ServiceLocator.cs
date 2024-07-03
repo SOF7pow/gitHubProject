@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace _gitProject.logic.ServiceLocator {
+namespace _gitProject.logic.Services {
     public class ServiceLocator {
         private ServiceLocator() {}
 

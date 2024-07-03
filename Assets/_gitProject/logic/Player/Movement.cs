@@ -7,6 +7,8 @@ namespace _gitProject.logic.Player {
         private float _moveSpeed;
         private readonly CharacterController _characterController;
         private const float Gravity = 15f;
+        
+        
         public Movement(CharacterController characterController, float moveSpeed) {
             _characterController = characterController;
             _moveSpeed = moveSpeed;

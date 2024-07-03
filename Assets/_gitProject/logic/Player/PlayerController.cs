@@ -1,4 +1,5 @@
-﻿using _gitProject.logic.ServiceLocator;
+﻿using _gitProject.logic.Components;
+using _gitProject.logic.Services;
 using UnityEngine;
 
 namespace _gitProject.logic.Player {
@@ -11,26 +12,41 @@ namespace _gitProject.logic.Player {
         private InputHandler _inputHandler;
         private Shoot _shoot;
 
-        [SerializeField] private Transform _muzzle;
-        [SerializeField] private float _rotateSpeed = 5f;
-        [SerializeField] private float _moveSpeed = 5f;
-        [SerializeField] private float _jumpForce = 8f;
+        public CharacterController Controller { get; private set; }
+        public Transform Muzzle { get; private set; }
         
-        public void Init() {
-            var controller = GetComponent<CharacterController>();
-            
-            _mouseLook = new MouseLook(transform, _rotateSpeed);
-            _movement = new Movement(controller, _moveSpeed);
-            _inputHandler = new InputHandler(transform, Camera.main);
-            _shoot = new Shoot(_muzzle,1,0.25f);
+        public float JumpForce { get; } = 8f;
+        public float RotateSpeed { get; } = 5f;
+        public float MoveSpeed { get; } = 5f;
+
+        private void Awake() {
+            Muzzle = GetComponentInChildren<MuzzleComponent>().transform;
+            Controller = GetComponent<CharacterController>();
+        }
+
+        public void Initialize
+        (
+            MouseLook mouseLook, 
+            Movement movement, 
+            InputHandler inputHandler, 
+            Shoot shoot
+        ) 
+        {
+            _mouseLook = mouseLook;
+            _movement = movement;
+            _inputHandler = inputHandler;
+            _shoot = shoot;
         }
 
         private void Update() {
-            _movement.Move(_inputHandler.CalculateMoveDirection());
-            _mouseLook.RotateToLookDirection(_inputHandler.CalculateLookDirection());
-            if (_inputHandler.IsJump()) _movement.Jump(_jumpForce);
+            var moveDirection = _inputHandler.CalculateMoveDirection();
+            _movement.Move(moveDirection);
+            var lookDirection = _inputHandler.CalculateLookDirection();
+            _mouseLook.RotateToLookDirection(lookDirection);
             
+            if (_inputHandler.IsJump()) _movement.Jump(JumpForce);
             if (_inputHandler.IsShoot()) _shoot.Attack();
+            
             _shoot.AttackCoolDown();
         }
     }

@@ -8,7 +8,6 @@ namespace _gitProject.logic.Components {
         public Action OnDied;
         
         private int _value;
-        
         public Health (int value) => _value = value;
 
         public virtual void Reduce(int value) {

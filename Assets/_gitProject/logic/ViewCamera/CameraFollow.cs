@@ -1,25 +1,23 @@
-using _gitProject.logic.Player;
+using _gitProject.logic.Services;
 using UnityEngine;
 
 namespace _gitProject.logic.ViewCamera {
-    public class CameraFollow : MonoBehaviour {
-        public Transform target;
+    public class CameraFollow : MonoBehaviour, IService {
+        private Transform _target;
         public float smoothSpeed = 0.125f;
         public Vector3 offset;
         
-        private void Start() {
-            target = ServiceLocator.ServiceLocator.Current.Get<PlayerController>().transform;
-        }
-        
+        public void Initialize(Transform target) => _target = target;
+
         private void LateUpdate() {
-            if (!target) return;
+            if (!_target) return;
             var scroll = Input.mouseScrollDelta.y * 1.1f;
             offset.y = Mathf.Clamp(offset.y - scroll, 5, 25);
             
-            var desiredPosition = target.position + offset;
+            var desiredPosition = _target.position + offset;
             var smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);
             transform.position = smoothedPosition;
-            transform.LookAt(target);
+            transform.LookAt(_target);
         }
     }
 }
