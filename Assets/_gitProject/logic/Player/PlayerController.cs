@@ -1,4 +1,4 @@
-﻿using _gitProject.logic.Components;
+﻿using _gitProject.logic.Components.Labels;
 using _gitProject.logic.Services;
 using UnityEngine;
 
@@ -12,30 +12,24 @@ namespace _gitProject.logic.Player {
         private InputHandler _inputHandler;
         private Shoot _shoot;
 
+        public MeshRenderer Laser { get; private set; }
         public CharacterController Controller { get; private set; }
         public Transform Muzzle { get; private set; }
-        
-        public float JumpForce { get; } = 8f;
-        public float RotateSpeed { get; } = 5f;
-        public float MoveSpeed { get; } = 5f;
 
-        private void Awake() {
+        public float JumpForce => 12f;
+        public float RotateSpeed => 10f;
+        public float MoveSpeed => 5f;
+
+        public void Initialize() {
             Muzzle = GetComponentInChildren<MuzzleComponent>().transform;
             Controller = GetComponent<CharacterController>();
-        }
-
-        public void Initialize
-        (
-            MouseLook mouseLook, 
-            Movement movement, 
-            InputHandler inputHandler, 
-            Shoot shoot
-        ) 
-        {
-            _mouseLook = mouseLook;
-            _movement = movement;
-            _inputHandler = inputHandler;
-            _shoot = shoot;
+            Laser = GetComponentInChildren<LaserComponet>().gameObject.GetComponent<MeshRenderer>();
+            Laser.enabled = false;
+            
+            _mouseLook = new MouseLook(transform, RotateSpeed);
+            _movement = new Movement(Controller, MoveSpeed);
+            _inputHandler = new InputHandler(transform, Camera.main);
+            _shoot = new Shoot(Muzzle, Laser, 1, 0.25f);
         }
 
         private void Update() {

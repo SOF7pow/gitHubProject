@@ -2,21 +2,24 @@ using System;
 using UnityEngine;
 
 namespace _gitProject.logic.Components {
-    public class Health{
-        
+    public sealed class Health {
+
+        public Action OnHealthTriggered;
         public Action<int> OnHealthChanged;
         public Action OnDied;
-        
-        private int _value;
-        public Health (int value) => _value = value;
 
-        public virtual void Reduce(int value) {
+        public int GetHealth { get; private set; }
+
+        public Health (int health) => GetHealth = health;
+
+        public void Reduce(int value) {
             Debug.Log($"Take damage");
             if (value < 0) 
                 throw new ArgumentException(nameof(value));
-            _value -= value;
-            OnHealthChanged?.Invoke(_value);
-            if (_value <= 0) 
+            GetHealth -= value;
+            OnHealthChanged?.Invoke(GetHealth);
+            OnHealthTriggered?.Invoke();
+            if (GetHealth <= 0) 
                 OnDied?.Invoke();
         }
     }
