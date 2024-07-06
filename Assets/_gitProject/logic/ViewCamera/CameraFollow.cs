@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace _gitProject.logic.ViewCamera {
     public class CameraFollow : MonoBehaviour, IService {
-        private Transform _target;
-        public float smoothSpeed = 0.125f;
-        public Vector3 offset;
+        [SerializeField] private float smoothSpeed;
+        [SerializeField] private Vector3 offset;
         
+        private Transform _target;
         public void Initialize(Transform target) => _target = target;
 
         private void LateUpdate() {

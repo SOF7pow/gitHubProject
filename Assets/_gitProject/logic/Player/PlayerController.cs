@@ -1,47 +1,71 @@
-﻿using _gitProject.logic.Components.Labels;
+﻿using System.Collections;
+using _gitProject.logic.Components;
+using _gitProject.logic.Components.Labels;
+using _gitProject.logic.Events;
 using _gitProject.logic.Services;
 using UnityEngine;
 
 namespace _gitProject.logic.Player {
     
-    [RequireComponent(typeof(CharacterController))]
+    [RequireComponent(typeof(CharacterController),typeof(AudioSource))]
     public class PlayerController : MonoBehaviour, IService {
 
+        private Shoot _shoot;
         private Movement _movement;
         private MouseLook _mouseLook;
         private InputHandler _inputHandler;
-        private Shoot _shoot;
+        private SoundReaction _shootSoundReaction;
+        
+        private CharacterController _controller;
+        private MeshRenderer _laser;
+        private Transform _muzzle;
+        private AudioSource _source;
 
-        public MeshRenderer Laser { get; private set; }
-        public CharacterController Controller { get; private set; }
-        public Transform Muzzle { get; private set; }
-
-        public float JumpForce => 12f;
-        public float RotateSpeed => 10f;
-        public float MoveSpeed => 5f;
-
+        [SerializeField] private float _jumpForce;
+        [SerializeField] private float _rotateSpeed;
+        [SerializeField] private float _moveSpeed;
+        [SerializeField] private float _fireRate;
+        [SerializeField] private int _damage;
         public void Initialize() {
-            Muzzle = GetComponentInChildren<MuzzleComponent>().transform;
-            Controller = GetComponent<CharacterController>();
-            Laser = GetComponentInChildren<LaserComponet>().gameObject.GetComponent<MeshRenderer>();
-            Laser.enabled = false;
+            _controller ??= GetComponent<CharacterController>();
+            _muzzle ??= GetComponentInChildren<MuzzleLabel>().transform;
+            _laser ??= GetComponentInChildren<LaserLabel>().gameObject.GetComponent<MeshRenderer>();
+            _source ??= GetComponent<AudioSource>();
             
-            _mouseLook = new MouseLook(transform, RotateSpeed);
-            _movement = new Movement(Controller, MoveSpeed);
-            _inputHandler = new InputHandler(transform, Camera.main);
-            _shoot = new Shoot(Muzzle, Laser, 1, 0.25f);
+            _mouseLook = new (transform, _rotateSpeed);
+            _movement = new (_controller, _moveSpeed);
+            _inputHandler = new (transform, Camera.main);
+            _shoot = new (_muzzle, _laser, _damage, _fireRate);
+            _shootSoundReaction = new (ServiceLocator.Current.Get<SoundStorage>().ShootClips, _source);
+            
+            _shoot.OnShoot += _shootSoundReaction.React;
+            StartCoroutine(UpdateData());
+        }
+        
+        private void OnDisable() {
+            _shoot.OnShoot -= _shootSoundReaction.React;
+            StopCoroutine(UpdateData());
         }
 
         private void Update() {
             var moveDirection = _inputHandler.CalculateMoveDirection();
-            _movement.Move(moveDirection);
             var lookDirection = _inputHandler.CalculateLookDirection();
+            
+            _movement.Move(moveDirection);
             _mouseLook.RotateToLookDirection(lookDirection);
             
-            if (_inputHandler.IsJump()) _movement.Jump(JumpForce);
-            if (_inputHandler.IsShoot()) _shoot.Attack();
+            if (_inputHandler.IsJump()) _movement.Jump(_jumpForce);
+            if (_inputHandler.IsShoot()) _shoot.ShootFire();
             
-            _shoot.AttackCoolDown();
+            _shoot.ShootCoolDown();
+        }
+
+        private IEnumerator UpdateData() 
+        {
+            while (true) {
+                yield return new WaitForSeconds(0.5f);
+                EventBus.Instance.OnUpdatePlayerPosition?.Invoke(transform.position);
+            }
         }
     }
 }

@@ -14,7 +14,9 @@ namespace _gitProject.logic.Player {
         public void Move(Vector3 direction) {
             _moveDirection.x = direction.x * _moveSpeed;
             _moveDirection.z = direction.z * _moveSpeed;
-            _moveDirection.y -= Gravity * Time.deltaTime;
+            if (!_characterController.isGrounded) {
+                _moveDirection.y -= Gravity * Time.deltaTime;
+            }
             _characterController.Move(_moveDirection * Time.deltaTime);
         }
         public void Jump(float force) {

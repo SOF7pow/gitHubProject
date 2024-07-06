@@ -8,7 +8,6 @@ namespace _gitProject.logic.Components {
         private readonly Renderer _renderer;
         private readonly Color _first = Color.black;
         private readonly Color _second = Color.red;
-        
         public ColorChanger(int healthValue, Renderer meshRenderer) {
             _renderer = meshRenderer;
             _maxValue = healthValue;

@@ -1,26 +1,30 @@
-﻿using _gitProject.logic.Player;
-using _gitProject.logic.ViewCamera;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace _gitProject.logic.Services {
     public class EntryPoint : MonoBehaviour {
 
-        [SerializeField] private PlayerController _playerController;
-        [SerializeField] private CameraFollow _camera;
-        private void Awake() {
-            Register();
-            Init();
-        }
+        [SerializeField] private SoundStorage _soundStorage;
+        [SerializeField] private PrefabStorage _prefabStorage;
         
-        private void Register() {
+        private void Awake() {
+            _soundStorage ??= GetComponentInChildren<SoundStorage>();
+            _prefabStorage ??= GetComponentInChildren<PrefabStorage>();
+            var player = Instantiate(_prefabStorage.PlayerController);
+            var cameraFollow = Instantiate(_prefabStorage.Camera);
+            
             ServiceLocator.Initialize();
-            ServiceLocator.Current.Register(_playerController);
-            ServiceLocator.Current.Register(_camera);
-        }
-        private void Init() {
-            var player = Instantiate(_playerController, Vector3.up, Quaternion.identity);
+            ServiceLocator.Current.Register(player);
+            ServiceLocator.Current.Register(cameraFollow);
+            ServiceLocator.Current.Register(_soundStorage);
+            ServiceLocator.Current.Register(_prefabStorage);
+            
             player.Initialize();
-            _camera.Initialize(player.transform);
+            cameraFollow.Initialize(player.transform);
+            
+            for (var i = 0; i < 25; i++) {
+                var enemy = Instantiate(_prefabStorage.EnemyController);
+                enemy.Initialize();
+            }
         }
     }
 }
