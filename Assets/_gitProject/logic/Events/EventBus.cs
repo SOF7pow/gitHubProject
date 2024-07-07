@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 namespace _gitProject.logic.Events {
-    public class EventBus {
+    public sealed class EventBus {
         private EventBus() {}
         private static EventBus _instance;
         public static EventBus Instance => _instance ??= new EventBus();
@@ -11,5 +11,6 @@ namespace _gitProject.logic.Events {
         public Action OnGamePaused;
 
         public Action<Vector3> OnUpdatePlayerPosition;
+        public Action OnCriticalShot;
     }
 }

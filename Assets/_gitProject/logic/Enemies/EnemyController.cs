@@ -2,6 +2,7 @@
 using _gitProject.logic.Events;
 using _gitProject.logic.Interfaces;
 using _gitProject.logic.Services;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,42 +12,60 @@ namespace _gitProject.logic.Enemies {
         
         private Health _health;
         private ColorChanger _colorChanger;
-        private SoundReaction _hitReaction;
-        private SoundReaction _dieReaction;
+        private SoundReaction _soundReaction;
         private TargetChaser _targetChaser;
-        private PopUpReaction _popUpReaction;
+        private PopUpVisualReaction _popUpVisualReaction;
+        private EffectVisualReaction _hitVisualReaction;
+        private Collider _collider;
+        private NavMeshAgent _agent;
+        private SoundsData _soundsData;
+        private PrefabsData _prefabsData;
 
+        [SerializeField] private int _healthValue = 20;
         public void Initialize() {
             var source = GetComponent<AudioSource>();
-            var soundStorage = ServiceLocator.Current.Get<SoundStorage>();
-            var prefabStorage = ServiceLocator.Current.Get<PrefabStorage>();
+            _prefabsData = ServiceLocator.Current.Get<PrefabsData>();
             
-            _health = new Health(10);
-            _colorChanger = new ColorChanger(_health.GetHealth, GetComponent<Renderer>());
-            _hitReaction = new SoundReaction(soundStorage.HitClips, source);
-            _dieReaction= new SoundReaction(soundStorage.DieClips, source);
-            _targetChaser = new TargetChaser(GetComponent<NavMeshAgent>());
-            _popUpReaction = new PopUpReaction(prefabStorage.PopUpDamage, transform);
+            _collider ??= GetComponent<Collider>();
+            _agent ??= GetComponent<NavMeshAgent>();
+            _soundsData = ServiceLocator.Current.Get<SoundsData>();
+            
+
+            _health = new Health(_healthValue);
+            _colorChanger = new ColorChanger(_health.GetHealth, GetComponent<Renderer>(), Color.black, Color.red);
+            _soundReaction = new SoundReaction(source);
+            
+            _targetChaser = new TargetChaser(_agent);
+            _popUpVisualReaction = new PopUpVisualReaction(_prefabsData.Storage.PopUpDamage, transform);
+            _hitVisualReaction = new EffectVisualReaction(transform);
             
             _health.OnHealthChanged += _colorChanger.ChangeGradientColor;
-            _health.OnHealthTriggered += _hitReaction.React;
-            _health.OnDied += _dieReaction.React;
+            _health.OnDied += () => _soundReaction.React(_soundsData.Storage.Die,1f);
             _health.OnDied += DestroySelf;
-            
             EventBus.Instance.OnUpdatePlayerPosition += _targetChaser.UpdateTargetPosition;
         }
         private void OnDisable() {
             _health.OnHealthChanged -= _colorChanger.ChangeGradientColor;
-            _health.OnHealthTriggered -= _hitReaction.React;
-            _health.OnDied -= _dieReaction.React;
+            _health.OnDied -= () => _soundReaction.React(_soundsData.Storage.Die,1f);
             _health.OnDied -= DestroySelf;
             EventBus.Instance.OnUpdatePlayerPosition -= _targetChaser.UpdateTargetPosition;
         }
         public void TakeDamage(int amount) {
+            transform.Translate(Vector3.forward * (-amount * 0.25f));
+            transform.DOPunchScale(Vector3.one * (amount * 0.2f), 0.15f, 2);
+            transform.DOMoveY(transform.position.y * 1.5f, 0.1f);
+            
+            _soundReaction.React(_soundsData.Storage.Hit, 0.25f);
+            _popUpVisualReaction.React(amount, _prefabsData.Storage.PopUpDamage);
+            _hitVisualReaction.React(amount, _prefabsData.Storage.BaseHitEffect);
+            
             _health.Reduce(amount);
-            _popUpReaction.CreatePopUp(amount);
         }
-
-        private void DestroySelf() => Destroy(gameObject);
+        
+        private void DestroySelf() {
+            _collider.enabled = false;
+            _agent.isStopped = true;
+            Destroy(gameObject, 0.25f);
+        }
     }
 }

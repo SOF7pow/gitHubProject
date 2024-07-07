@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2111962d0d14c10b7a39230296a2231, type: 3}
+  m_Name: SoundStorageSO
+  m_EditorClassIdentifier: 
+  Hit:
+  - {fileID: 8300000, guid: 3c9c3594ce0351d469b1c91b57a9a160, type: 3}
+  - {fileID: 8300000, guid: 8d6ccecf44579164f8ca697b20e69a3f, type: 3}
+  - {fileID: 8300000, guid: a307a6c73998bcd4c935a26c54fb2115, type: 3}
+  Shoot:
+  - {fileID: 8300000, guid: 4310474905e266640852f43bd609a1a4, type: 3}
+  Die:
+  - {fileID: 8300000, guid: d5e7fd4269fef764e92e2ba0658ff06c, type: 3}
+  CriticalShot:
+  - {fileID: 8300000, guid: 60edfd8fb6608fb4492db7ad9dd42bff, type: 3}
+  Dash:
+  - {fileID: 8300000, guid: ab297b593498a6e47ba84de770477cbe, type: 3}
+  Jump:
+  - {fileID: 8300000, guid: a245ee5d75348c84a89ffb7992f1dc82, type: 3}

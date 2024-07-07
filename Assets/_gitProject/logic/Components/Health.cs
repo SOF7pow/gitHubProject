@@ -7,16 +7,25 @@ namespace _gitProject.logic.Components {
         public Action<int> OnHealthChanged;
         public Action OnDied;
         public int GetHealth { get; private set; }
-        public Health (int health) => GetHealth = health;
+        private int _startHealth;
+
+        public Health (int health) {
+            GetHealth = health;
+            _startHealth = GetHealth;
+        }
 
         public void Reduce(int value) {
-            if (value < 0) 
+            if (value < 0)
                 throw new ArgumentException(nameof(value));
             GetHealth -= value;
-            OnHealthChanged?.Invoke(GetHealth);
             OnHealthTriggered?.Invoke();
+            OnHealthChanged?.Invoke(GetHealth);
             if (GetHealth <= 0) 
                 OnDied?.Invoke();
+        }
+        public void Regenerate(int value) {
+            if (GetHealth + value > _startHealth) GetHealth = _startHealth;
+            else GetHealth += value;
         }
     }
 }

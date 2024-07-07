@@ -6,11 +6,13 @@ namespace _gitProject.logic.Components {
         private Gradient _colorGradient;
         private readonly int _maxValue;
         private readonly Renderer _renderer;
-        private readonly Color _first = Color.black;
-        private readonly Color _second = Color.red;
-        public ColorChanger(int healthValue, Renderer meshRenderer) {
+        private readonly Color _first;
+        private readonly Color _second;
+        public ColorChanger(int healthValue, Renderer meshRenderer, Color first, Color second) {
             _renderer = meshRenderer;
             _maxValue = healthValue;
+            _first = first;
+            _second = second;
             SetStartColorGradient();
         }
         
@@ -23,7 +25,6 @@ namespace _gitProject.logic.Components {
             _colorGradient.SetKeys(colors,alphas);
             _renderer.material.color = _first;
         }
-        
         public void ChangeGradientColor(int value) {
             var deltaHealth = (float) value / _maxValue;
             _renderer.material.color = _colorGradient.Evaluate(deltaHealth);

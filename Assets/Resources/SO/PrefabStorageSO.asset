@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cf8e196197bc27408008871f9c48c7c, type: 3}
+  m_Name: PrefabStorageSO
+  m_EditorClassIdentifier: 
+  CameraBehaviour: {fileID: 8506821062667388150, guid: 7d869b86b71982d48a85e844ad46b840, type: 3}
+  PlayerController: {fileID: 5425343944376676598, guid: 5fe9d756ca87c994e9217cdfc9e68372, type: 3}
+  EnemyController: {fileID: 8367662716639953051, guid: 40574fbe96e5e10408993fa02786fd15, type: 3}
+  PopUpDamage: {fileID: 7363915620955936465, guid: 795e6b06824bb2a41b82da1b06df0876, type: 3}
+  BaseHitEffect: {fileID: 3463157229188906966, guid: 47096eff328e11a418ace7db2d72aa97, type: 3}
+  DeathEffect: {fileID: 3463157229188906966, guid: 47096eff328e11a418ace7db2d72aa97, type: 3}
+  DashEffect: {fileID: 5933602760919840800, guid: fcb74f28d107e284e80af037bfec14ca, type: 3}
+  CritPhrases:
+  - crit
+  - wow
+  - boom
+  - '!!!'

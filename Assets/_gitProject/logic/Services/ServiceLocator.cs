@@ -8,7 +8,6 @@ namespace _gitProject.logic.Services {
 
         private readonly Dictionary<Type, IService> _services = new();
         public static ServiceLocator Current { get; private set; }
-
         public static void Initialize() => Current = new ServiceLocator();
 
         public T Get<T>() where T : IService {
@@ -17,7 +16,6 @@ namespace _gitProject.logic.Services {
                 Debug.LogError($"{key} not registered with {GetType().Name}");
                 throw new InvalidOperationException();
             }
-
             return (T) _services[key];
         }
 
@@ -25,7 +23,6 @@ namespace _gitProject.logic.Services {
             var key = typeof(T);
             if (!_services.ContainsKey(key)) {
                 _services.Add(key, service);
-                Debug.Log($"{key} is registered");
             }
             else {
                 Debug.LogError(
