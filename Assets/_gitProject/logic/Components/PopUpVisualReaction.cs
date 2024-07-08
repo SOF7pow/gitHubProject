@@ -9,9 +9,9 @@ using Object = UnityEngine.Object;
 namespace _gitProject.logic.Components {
     public class PopUpVisualReaction : VisualReaction {
         private float _value;
-        public PopUpVisualReaction(GameObject popUp, Transform parent) : base(parent) {}
-        public override void React<T>(T value, GameObject Prefab) {
-            var popUp = Object.Instantiate(Prefab,Parent.position + Vector3.up * 3,Parent.rotation,Parent);
+        public PopUpVisualReaction(Transform parent) : base(parent) {}
+        public override void React<T>(GameObject prefab, T value) {
+            var popUp = Object.Instantiate(prefab,Parent.position + Vector3.up * 3,Parent.rotation,Parent);
             popUp.transform.LookAt(ServiceLocator.Current.Get<CameraBehaviour>().transform.position);
             var text = popUp.GetComponentInChildren<TextMeshPro>();
             var textValue = value.ToString();
@@ -19,7 +19,7 @@ namespace _gitProject.logic.Components {
                 var intValue = Convert.ToInt32(value);
                 text.text = textValue;
                 if (intValue > 1) text.color = Color.yellow;
-                text.fontSize = intValue * 2;
+                text.fontSize = 5 + intValue * 0.2f;
                 popUp.transform.DOShakePosition(0.15f, 2f);
                 popUp.transform.DOPunchRotation(Vector3.down * 2, 0.15f, 2,1f);
                 Object.Destroy(popUp,0.85f);

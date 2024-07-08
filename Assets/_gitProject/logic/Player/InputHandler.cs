@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace _gitProject.logic.Player {
     public class InputHandler {
+        
         private readonly Camera _camera;
         private readonly Transform _transform;
         private const float Gravity = 9.81f;
@@ -14,7 +15,6 @@ namespace _gitProject.logic.Player {
             var forward = Input.GetAxisRaw("Vertical");
             return new Vector3(right, 0, forward).normalized;
         }
-
         public Vector3 CalculateLookDirection() {
             var mousePosition =
                 _camera.ScreenToWorldPoint(new Vector3(
@@ -24,17 +24,8 @@ namespace _gitProject.logic.Player {
             var direction = mousePosition - _transform.position;
             return direction;
         }
-
-        public bool IsJump() {
-            return Input.GetKeyDown(KeyCode.Space);
-        }
-
-        public bool IsShoot() {
-            return Input.GetMouseButton(0);
-        }
-        
-        public bool IsDash() {
-            return Input.GetKeyDown(KeyCode.LeftShift);
-        }
+        public bool IsJump() => Input.GetKeyDown(KeyCode.Space);
+        public bool IsShoot() => Input.GetMouseButton(0);
+        public bool IsDash() => Input.GetKeyDown(KeyCode.LeftShift);
     }
 }

@@ -5,10 +5,9 @@ using Object = UnityEngine.Object;
 
 namespace _gitProject.logic.Components {
     public class EffectVisualReaction : VisualReaction {
-
         public EffectVisualReaction(Transform parent) : base(parent){}
         
-        public override void React<T>(T value, GameObject prefab) {
+        public override void React<T>(GameObject prefab,T value) {
             var effect = Object.Instantiate(prefab,Parent.position,Parent.rotation,Parent);
             var intValue = Convert.ToInt32(value);
             effect.transform.localScale *= intValue;

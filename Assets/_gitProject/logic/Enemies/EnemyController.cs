@@ -10,61 +10,49 @@ namespace _gitProject.logic.Enemies {
     [RequireComponent(typeof(NavMeshAgent),typeof(AudioSource))]
     public class EnemyController : MonoBehaviour, IDamageable {
         
-        private Health _health;
-        private ColorChanger _colorChanger;
-        private SoundReaction _soundReaction;
-        private TargetChaser _targetChaser;
-        private PopUpVisualReaction _popUpVisualReaction;
-        private EffectVisualReaction _hitVisualReaction;
-        private Collider _collider;
-        private NavMeshAgent _agent;
-        private SoundsData _soundsData;
-        private PrefabsData _prefabsData;
-
         [SerializeField] private int _healthValue = 20;
+        
+        private Health _health;
+        private HealthColorChanger _healthColorChanger;
+        private SoundReaction _soundReaction;
+        private PositionFollower _positionFollower;
+        
+        private VisualReaction _popUpVisualReaction;
+        private VisualReaction _hitVisualReaction;
         public void Initialize() {
-            var source = GetComponent<AudioSource>();
-            _prefabsData = ServiceLocator.Current.Get<PrefabsData>();
             
-            _collider ??= GetComponent<Collider>();
-            _agent ??= GetComponent<NavMeshAgent>();
-            _soundsData = ServiceLocator.Current.Get<SoundsData>();
-            
-
             _health = new Health(_healthValue);
-            _colorChanger = new ColorChanger(_health.GetHealth, GetComponent<Renderer>(), Color.black, Color.red);
-            _soundReaction = new SoundReaction(source);
-            
-            _targetChaser = new TargetChaser(_agent);
-            _popUpVisualReaction = new PopUpVisualReaction(_prefabsData.Storage.PopUpDamage, transform);
+            _healthColorChanger = new HealthColorChanger(_health.GetHealth, GetComponent<Renderer>(), Color.black, Color.red);
+            _soundReaction = new SoundReaction(GetComponent<AudioSource>());
+            _positionFollower = new PositionFollower(GetComponent<NavMeshAgent>());
+            _popUpVisualReaction = new PopUpVisualReaction(transform);
             _hitVisualReaction = new EffectVisualReaction(transform);
             
-            _health.OnHealthChanged += _colorChanger.ChangeGradientColor;
-            _health.OnDied += () => _soundReaction.React(_soundsData.Storage.Die,1f);
+            _health.OnHealthChanged += _healthColorChanger.ChangeGradientColor;
+            _health.OnDied += () => _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.DieSounds,0.75f);
             _health.OnDied += DestroySelf;
-            EventBus.Instance.OnUpdatePlayerPosition += _targetChaser.UpdateTargetPosition;
+            EventBus.Instance.OnUpdatePlayerPositionData += _positionFollower.UpdateTargetPosition;
         }
         private void OnDisable() {
-            _health.OnHealthChanged -= _colorChanger.ChangeGradientColor;
-            _health.OnDied -= () => _soundReaction.React(_soundsData.Storage.Die,1f);
+            _health.OnHealthChanged -= _healthColorChanger.ChangeGradientColor;
+            _health.OnDied -= () => _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.DieSounds,1f);
             _health.OnDied -= DestroySelf;
-            EventBus.Instance.OnUpdatePlayerPosition -= _targetChaser.UpdateTargetPosition;
+            EventBus.Instance.OnUpdatePlayerPositionData -= _positionFollower.UpdateTargetPosition;
         }
         public void TakeDamage(int amount) {
             transform.Translate(Vector3.forward * (-amount * 0.25f));
             transform.DOPunchScale(Vector3.one * (amount * 0.2f), 0.15f, 2);
             transform.DOMoveY(transform.position.y * 1.5f, 0.1f);
             
-            _soundReaction.React(_soundsData.Storage.Hit, 0.25f);
-            _popUpVisualReaction.React(amount, _prefabsData.Storage.PopUpDamage);
-            _hitVisualReaction.React(amount, _prefabsData.Storage.BaseHitEffect);
+            _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.HitSounds, 0.25f);
+            _popUpVisualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.PopUpDamage, amount);
+            _hitVisualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.BaseHitEffect, amount);
             
             _health.Reduce(amount);
         }
-        
         private void DestroySelf() {
-            _collider.enabled = false;
-            _agent.isStopped = true;
+            GetComponent<Collider>().enabled = false;
+            GetComponent<NavMeshAgent>().isStopped = true;
             Destroy(gameObject, 0.25f);
         }
     }

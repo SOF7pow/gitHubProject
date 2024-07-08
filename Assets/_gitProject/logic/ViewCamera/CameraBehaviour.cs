@@ -2,7 +2,6 @@ using _gitProject.logic.Events;
 using _gitProject.logic.Services;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace _gitProject.logic.ViewCamera {
     public class CameraBehaviour : MonoBehaviour, IService {
@@ -22,13 +21,14 @@ namespace _gitProject.logic.ViewCamera {
             _target = target;
             _child = GetComponentInChildren<Camera>().transform;
             EventBus.Instance.OnCriticalShot += ShakeCamera;
+            EventBus.Instance.OnLanded += ShakeCamera;
         }
         private void OnDisable() {
-            EventBus.Instance.OnCriticalShot += ShakeCamera;
+            EventBus.Instance.OnCriticalShot -= ShakeCamera;
+            EventBus.Instance.OnLanded -= ShakeCamera;
         }
-        private void LateUpdate() {
-            Follow(_target);
-        }
+        private void LateUpdate() => Follow(_target);
+
         private void Follow(Transform target) {
             if (!target) return;
             var scroll = Input.mouseScrollDelta.y * 1.1f;

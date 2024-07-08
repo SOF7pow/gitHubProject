@@ -19,6 +19,8 @@ namespace _gitProject.logic.ScriptableObjects {
         public GameObject BaseHitEffect;
         public GameObject DeathEffect;
         public GameObject DashEffect;
+        public GameObject JumpEffect;
+        public GameObject LandingEffect;
         
         [Space, Header("Phrases")]
         public string[] CritPhrases = {"crit", "wow", "boom","!!!"};

@@ -10,7 +10,8 @@ namespace _gitProject.logic.Events {
         public Action OnGameStarted;
         public Action OnGamePaused;
 
-        public Action<Vector3> OnUpdatePlayerPosition;
+        public Action<Vector3> OnUpdatePlayerPositionData;
         public Action OnCriticalShot;
+        public Action OnLanded;
     }
 }

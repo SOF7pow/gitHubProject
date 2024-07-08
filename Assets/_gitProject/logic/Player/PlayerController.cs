@@ -7,6 +7,7 @@ using _gitProject.logic.Services;
 using _gitProject.logic.ViewCamera;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Serialization;
 
 namespace _gitProject.logic.Player {
     
@@ -14,125 +15,129 @@ namespace _gitProject.logic.Player {
     public class PlayerController : MonoBehaviour, IService {
 
         private Shoot _shoot;
+        private Health _health;
         private Movement _movement;
         private MouseLook _mouseLook;
         private InputHandler _inputHandler;
-        private Health _health;
-        private ColorChanger _colorChanger;
-        
-        private SoundsData _soundsData;
-        private PrefabsData _prefabData;
+        private HealthColorChanger _healthColorChanger;
 
         private SoundReaction _soundReaction;
-        private VisualReaction _dashVisualReaction;
-        private VisualReaction _criticalDamageVisualReaction;
+        private VisualReaction _visualReaction;
+        private VisualReaction _textVisualReaction;
         
-        private LaserLabel _laser;
-        private Transform _laserContainer;
         private Transform _muzzle;
-        private AudioSource _source;
-        private Transform _transform;
+        private Transform _laserContainer;
+        private LaserLabel _laser;
+        
         private float _moveSpeed;
+        private int _damage;
 
         [SerializeField, UnityEngine.Min(1)] private int _maxHealth = 100;
-        [SerializeField, UnityEngine.Min(1), Max(20)] private int _maxMoveSpeed = 10;
-        
-        
+        [SerializeField, UnityEngine.Min(1), Max(20)] private int _startMoveSpeed = 10;
+        [SerializeField, UnityEngine.Min(1), Max(20)] private int _startDamage = 1;
         
         [SerializeField,UnityEngine.Min(0)] private float _jumpForce;
         [SerializeField,UnityEngine.Min(0)] private float _rotateSpeed;
-        [SerializeField,UnityEngine.Min(0.01f)] private float _fireRate;
-        [SerializeField,UnityEngine.Min(1)] private int _damage;
+        [SerializeField,UnityEngine.Min(0)] private float _fireRate;
         [SerializeField,UnityEngine.Min(1)] private int _damageMultiplyerKoef;
         public void Initialize() {
-            _transform ??= GetComponent<Transform>();
             _muzzle ??= GetComponentInChildren<MuzzleLabel>().transform;
-            _laser ??= GetComponentInChildren<LaserLabel>();
-            _laserContainer ??= _laser.GetComponentInParent<LaserContainerLabel>().transform;
-            _source ??= GetComponent<AudioSource>();
-            _soundsData = ServiceLocator.Current.Get<SoundsData>();
-            _prefabData = ServiceLocator.Current.Get<PrefabsData>();
+            _laserContainer ??= _muzzle.GetComponentInChildren<LaserContainerLabel>().transform;
 
-            _moveSpeed = _maxMoveSpeed;
+            _moveSpeed = _startMoveSpeed;
+            _damage = _startDamage;
             _health = new Health(_maxHealth);
-            _colorChanger = new ColorChanger(_health.GetHealth, GetComponent<Renderer>(), Color.white, Color.red);
+            _healthColorChanger = new HealthColorChanger(_health.GetHealth, GetComponent<Renderer>(), Color.white, Color.red);
             
-            _mouseLook = new (_transform, _rotateSpeed);
+            _mouseLook = new (transform, _rotateSpeed);
             _movement = new (GetComponent<CharacterController>());
-            _inputHandler = new (_transform, ServiceLocator.Current.Get<CameraBehaviour>().GetComponentInChildren<Camera>());
-            _shoot = new (_muzzle, _laser, _fireRate, _damageMultiplyerKoef);
-            _soundReaction = new(_source);
-            
-            _dashVisualReaction = new EffectVisualReaction(_transform);
-            _criticalDamageVisualReaction = new PopUpVisualReaction(_prefabData.Storage.PopUpDamage, _transform);
+            _inputHandler = new (transform, ServiceLocator.Current.Get<CameraBehaviour>().GetComponentInChildren<Camera>());
+            _shoot = new (_muzzle, _fireRate, _damageMultiplyerKoef);
+            _soundReaction = new(GetComponent<AudioSource>());
+            _visualReaction = new EffectVisualReaction(transform);
+            _textVisualReaction = new PopUpVisualReaction(transform);
             
             EventBus.Instance.OnCriticalShot += OnCriticalDamageReact;
-            _health.OnHealthChanged += _colorChanger.ChangeGradientColor;
+            _health.OnHealthChanged += _healthColorChanger.ChangeGradientColor;
+            _movement.OnLanded += OnLandReact;
             StartCoroutine(UpdatePlayerPositionData());
         }
-        
         private void OnDisable() {
             EventBus.Instance.OnCriticalShot -= OnCriticalDamageReact;
-            _health.OnHealthChanged -= _colorChanger.ChangeGradientColor;
+            _health.OnHealthChanged -= _healthColorChanger.ChangeGradientColor;
+            _movement.OnLanded -= OnLandReact;
             StopCoroutine(UpdatePlayerPositionData());
         }
-
         private void Update() {
             var moveDirection = _inputHandler.CalculateMoveDirection();
             var lookDirection = _inputHandler.CalculateLookDirection();
-            
             _movement.Move(moveDirection, _moveSpeed);
             _mouseLook.RotateToLookDirection(lookDirection);
-            _shoot.ShootCoolDown();
+            _shoot.Reload();
 
             if (_inputHandler.IsJump() && _movement.IsJumped(_jumpForce)) {
-                _soundReaction.React(_soundsData.Storage.Jump,1f);
-                _dashVisualReaction.React(0.5f,_prefabData.Storage.DashEffect);
-                var heal = Mathf.RoundToInt(_maxHealth / 5);
+                ResetStats();
+                _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.JumpSounds,1f);
+                _visualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.JumpEffect,2f);
+                
+                var heal = Mathf.RoundToInt(_maxHealth * 0.2f);
                 _health.Regenerate(heal);
-                _colorChanger.ChangeGradientColor(_health.GetHealth);
-                _criticalDamageVisualReaction.React(heal.ToString(), _prefabData.Storage.PopUpDamage);
+                _healthColorChanger.ChangeGradientColor(_health.GetHealth);
+                _textVisualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.PopUpDamage, heal.ToString());
+                
             }
             
-            if (_inputHandler.IsShoot() && _shoot.IsShooted(_damage)) {
+            if (_inputHandler.IsDash() && _movement.IsDashed()) {
+                ResetStats();
+                _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.DashSounds,0.75f);
+                _visualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.DashEffect, 2f);
+                
+                var heal = Mathf.RoundToInt(_maxHealth * 0.5f);
+                _health.Regenerate(heal);
+                _healthColorChanger.ChangeGradientColor(_health.GetHealth);
+                _textVisualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.PopUpDamage,heal.ToString());
+            }
+            
+            if (_inputHandler.IsShoot() && _shoot.IsShoot(_damage)) {
                 ChangeLaserLength();
-                _soundReaction.React(_soundsData.Storage.Shoot,0.25f);
-                _health.Reduce(_damage);
-                if (_health.GetHealth < 1) _moveSpeed = 1;
-            }
-            
-            if (_inputHandler.IsDash() && _movement.Dashing()) {
-                _soundReaction.React(_soundsData.Storage.Dash,0.75f);
-                _dashVisualReaction.React(2f,_prefabData.Storage.DashEffect);
-                var heal = Mathf.RoundToInt(_maxHealth / 2);
-                _health.Regenerate(heal);
-                _colorChanger.ChangeGradientColor(_health.GetHealth);
-                _criticalDamageVisualReaction.React(heal.ToString(), _prefabData.Storage.PopUpDamage);
-                _moveSpeed = _maxMoveSpeed;
+                ReduceHealth(_health);
+                _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.ShootSounds,0.25f);
             }
         }
-        
         private void ChangeLaserLength() {
             if (_shoot.HitPoint != Vector3.zero) {
                 var distance = Vector3.Distance(transform.position, _shoot.HitPoint);
-                var length = distance / 50;
+                var length = distance * 0.02f;
                 _laserContainer.localScale = new Vector3(1, 1, length);
             }
-            else 
-                _laserContainer.localScale = new Vector3(1, 1, 1);
+            else _laserContainer.localScale = Vector3.one;
         }
-
         private void OnCriticalDamageReact() {
-            var phrase = _prefabData.Storage.CritPhrases.GetRandom();
-            _criticalDamageVisualReaction.React(phrase,_prefabData.Storage.PopUpDamage);
-            _soundReaction.React(_soundsData.Storage.CriticalShot, 0.5f);
+            var phrase = ServiceLocator.Current.Get<PrefabsData>().Storage.CritPhrases.GetRandom();
+            _textVisualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.PopUpDamage,phrase);
+            _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.CriticalShotSounds, 0.5f);
         }
-
+        private void ResetStats() {
+            _moveSpeed = _startMoveSpeed;
+            _damage = _startDamage;
+        }
+        private void ReduceHealth(Health health) {
+            health.Reduce(_damage);
+            if (health.GetHealth < 1) {
+                _moveSpeed = _startMoveSpeed * 0.5f;
+                _damage = _startDamage * _damageMultiplyerKoef;
+            }
+        }
+        private void OnLandReact() {
+            _visualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.LandingEffect,2f);
+            _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.LandSounds, 1f);
+            EventBus.Instance.OnLanded?.Invoke();
+        }
         private IEnumerator UpdatePlayerPositionData() 
         {
             while (true) {
                 yield return new WaitForSeconds(0.25f);
-                EventBus.Instance.OnUpdatePlayerPosition?.Invoke(transform.position);
+                EventBus.Instance.OnUpdatePlayerPositionData?.Invoke(transform.position);
             }
         }
     }
