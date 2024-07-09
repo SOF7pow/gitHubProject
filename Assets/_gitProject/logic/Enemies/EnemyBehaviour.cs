@@ -8,7 +8,7 @@ using UnityEngine.AI;
 
 namespace _gitProject.logic.Enemies {
     [RequireComponent(typeof(NavMeshAgent),typeof(AudioSource))]
-    public class EnemyController : MonoBehaviour, IDamageable {
+    public class EnemyBehaviour : MonoBehaviour, IDamageable {
         
         [SerializeField] private int _healthValue = 20;
         
@@ -16,18 +16,13 @@ namespace _gitProject.logic.Enemies {
         private HealthColorChanger _healthColorChanger;
         private SoundReaction _soundReaction;
         private PositionFollower _positionFollower;
-        
-        private VisualReaction _popUpVisualReaction;
-        private VisualReaction _hitVisualReaction;
+        private VisualReaction _visualReaction;
         public void Initialize() {
-            
             _health = new Health(_healthValue);
             _healthColorChanger = new HealthColorChanger(_health.GetHealth, GetComponent<Renderer>(), Color.black, Color.red);
             _soundReaction = new SoundReaction(GetComponent<AudioSource>());
             _positionFollower = new PositionFollower(GetComponent<NavMeshAgent>());
-            _popUpVisualReaction = new PopUpVisualReaction(transform);
-            _hitVisualReaction = new EffectVisualReaction(transform);
-            
+            _visualReaction = new VisualReaction(transform);
             _health.OnHealthChanged += _healthColorChanger.ChangeGradientColor;
             _health.OnDied += () => _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.DieSounds,0.75f);
             _health.OnDied += DestroySelf;
@@ -43,11 +38,9 @@ namespace _gitProject.logic.Enemies {
             transform.Translate(Vector3.forward * (-amount * 0.25f));
             transform.DOPunchScale(Vector3.one * (amount * 0.2f), 0.15f, 2);
             transform.DOMoveY(transform.position.y * 1.5f, 0.1f);
-            
             _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.HitSounds, 0.25f);
-            _popUpVisualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.PopUpDamage, amount);
-            _hitVisualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.BaseHitEffect, amount);
-            
+            _visualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.PopUpDamage, amount);
+            _visualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.BaseHitEffect, amount * 0.5f);
             _health.Reduce(amount);
         }
         private void DestroySelf() {

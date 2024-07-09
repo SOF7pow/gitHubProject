@@ -11,7 +11,7 @@ namespace _gitProject.logic.ScriptableObjects {
         [Header("Logic")]
         public CameraBehaviour CameraBehaviour;
         public PlayerController PlayerController;
-        public EnemyController EnemyController;
+        [FormerlySerializedAs("EnemyController")] public EnemyBehaviour enemyBehaviour;
         
         [FormerlySerializedAs("PopUpDamageInfo")] [Space, Header("Effects")]
         public GameObject PopUpDamage;

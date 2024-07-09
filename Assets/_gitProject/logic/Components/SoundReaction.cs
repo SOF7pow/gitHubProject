@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace _gitProject.logic.Components {
     public class SoundReaction {
+        
         private readonly AudioSource _source;
         public SoundReaction(AudioSource source) {
             _source = source;

@@ -1,11 +1,10 @@
 ﻿using _gitProject.logic.ScriptableObjects;
-using UnityEngine;
 
 namespace _gitProject.logic.Services {
     public sealed class PrefabsData : IService {
-        public PrefabsStorageScriptableObject Storage { get; }
-        public PrefabsData() {
-            Storage = Resources.Load<PrefabsStorageScriptableObject>("SO/PrefabStorageSO");
-        }
+        
+        private PrefabsStorageScriptableObject _storage;
+        public PrefabsStorageScriptableObject Storage => _storage;
+        public PrefabsData(PrefabsStorageScriptableObject storage) => _storage = storage;
     }
 }
