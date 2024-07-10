@@ -2,27 +2,38 @@ using _gitProject.logic.Enemies;
 using _gitProject.logic.Player;
 using _gitProject.logic.ViewCamera;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace _gitProject.logic.ScriptableObjects {
     [CreateAssetMenu(menuName = "PrefabsStorageSO")]
-    public class PrefabsStorageScriptableObject : ScriptableObject {
+    public sealed class PrefabsStorageScriptableObject : ScriptableObject {
         
         [Header("Logic")]
-        public CameraBehaviour CameraBehaviour;
-        public PlayerController PlayerController;
-        [FormerlySerializedAs("EnemyController")] public EnemyBehaviour enemyBehaviour;
+        [SerializeField] private CameraBehaviour cameraBehaviour;
+        [SerializeField] private PlayerController playerController;
+        [SerializeField] private EnemyBehaviour enemyBehaviour;
         
-        [FormerlySerializedAs("PopUpDamageInfo")] [Space, Header("Effects")]
-        public GameObject PopUpDamage;
-
-        public GameObject BaseHitEffect;
-        public GameObject DeathEffect;
-        public GameObject DashEffect;
-        public GameObject JumpEffect;
-        public GameObject LandingEffect;
-        
+        [Space, Header("Effects")]
+        [SerializeField] private GameObject popUpDamage;
+        [SerializeField] private GameObject baseHitEffect;
+        [SerializeField] private GameObject deathEffect;
+        [SerializeField] private GameObject dashEffect;
+        [SerializeField] private GameObject jumpEffect;
+        [SerializeField] private GameObject landingEffect;
         [Space, Header("Phrases")]
-        public string[] CritPhrases = {"crit", "wow", "boom","!!!"};
+        [SerializeField] private string[] critPhrases = {"crit", "wow", "boom","!!!"};
+        
+        public CameraBehaviour CameraBehaviour => cameraBehaviour;
+        public PlayerController PlayerController => playerController;
+        public EnemyBehaviour EnemyBehaviour => enemyBehaviour;
+        public GameObject PopUpDamage => popUpDamage;
+        public GameObject BaseHitEffect => baseHitEffect;
+        
+        public GameObject DeathEffect => deathEffect;
+        public GameObject DashEffect => dashEffect;
+        public GameObject JumpEffect => jumpEffect;
+        public GameObject LandingEffect => landingEffect;
+        public string[] CritPhrases => critPhrases;
+
+
     }
 }

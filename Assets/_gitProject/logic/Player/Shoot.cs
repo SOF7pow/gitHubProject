@@ -1,7 +1,7 @@
 using _gitProject.logic.Components.Labels;
+using _gitProject.logic.Events;
 using _gitProject.logic.Interfaces;
 using UnityEngine;
-using EventBus = _gitProject.logic.Events.EventBus;
 using Random = UnityEngine.Random;
 
 namespace _gitProject.logic.Player {
@@ -42,7 +42,7 @@ namespace _gitProject.logic.Player {
             if (IsMultipleAttack()) {
                 var criticalDamage = value * _damageMultiplierKoef;
                 damageable.TakeDamage(criticalDamage);
-                EventBus.Instance.OnCriticalShot?.Invoke();
+                EventsStorage.Instance.OnCriticalShot?.Invoke();
             }
             else damageable.TakeDamage(value);
             HitPoint = hit.point;
@@ -52,12 +52,12 @@ namespace _gitProject.logic.Player {
             if (_lastAttackTime < _attackDelay) {
                 _lastAttackTime += Time.deltaTime;
                 _canShoot = false;
-                if (_lastAttackTime > _attackDelay * 0.5f) _laserRenderer.enabled = false;
+                if (_lastAttackTime > _attackDelay * 0.2f) _laserRenderer.enabled = false;
             }
             else {
                 _canShoot = true;
             }
         }
-        private bool IsMultipleAttack() => Random.Range(1, 100) > 80;
+        private bool IsMultipleAttack() => Random.Range(1, 100) > 50;
     }
 }

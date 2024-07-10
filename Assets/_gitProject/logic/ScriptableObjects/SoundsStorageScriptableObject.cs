@@ -2,7 +2,7 @@
 
 namespace _gitProject.logic.ScriptableObjects {
     [CreateAssetMenu(menuName = "SoundsStorageSO")]
-    public class SoundsStorageScriptableObject : ScriptableObject {
+    public sealed class SoundsStorageScriptableObject : ScriptableObject {
         
          [SerializeField] private AudioClip[] _hitSounds;
          [SerializeField] private AudioClip[] _shootSounds;
@@ -18,7 +18,6 @@ namespace _gitProject.logic.ScriptableObjects {
          public AudioClip[] CriticalShotSounds => _criticalShotSounds;
          public AudioClip[] DashSounds => _dashSounds;
          public AudioClip[] JumpSounds => _jumpSounds;
-         
          public AudioClip[] HealSounds => _healSounds;
          public AudioClip[] LandSounds => _landSounds;
     }

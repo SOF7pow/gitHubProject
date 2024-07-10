@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cf8e196197bc27408008871f9c48c7c, type: 3}
   m_Name: PrefabStorageSO
   m_EditorClassIdentifier: 
-  CameraBehaviour: {fileID: 8506821062667388150, guid: 7d869b86b71982d48a85e844ad46b840, type: 3}
-  PlayerController: {fileID: 5425343944376676598, guid: 5fe9d756ca87c994e9217cdfc9e68372, type: 3}
-  EnemyController: {fileID: 8367662716639953051, guid: 40574fbe96e5e10408993fa02786fd15, type: 3}
-  PopUpDamage: {fileID: 7363915620955936465, guid: 795e6b06824bb2a41b82da1b06df0876, type: 3}
-  BaseHitEffect: {fileID: 3463157229188906966, guid: 47096eff328e11a418ace7db2d72aa97, type: 3}
-  DeathEffect: {fileID: 3463157229188906966, guid: 47096eff328e11a418ace7db2d72aa97, type: 3}
-  DashEffect: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
-  JumpEffect: {fileID: 1429954232896169633, guid: 83036083a4ebcd34f98131bd3cf6f4d2, type: 3}
-  LandingEffect: {fileID: 141433446842962269, guid: 9fe8f8b3288e45a44af36ff8aa04486e, type: 3}
-  CritPhrases:
+  cameraBehaviour: {fileID: 8506821062667388150, guid: 7d869b86b71982d48a85e844ad46b840, type: 3}
+  playerController: {fileID: 5425343944376676598, guid: 5fe9d756ca87c994e9217cdfc9e68372, type: 3}
+  enemyBehaviour: {fileID: 8367662716639953051, guid: 40574fbe96e5e10408993fa02786fd15, type: 3}
+  popUpDamage: {fileID: 7363915620955936465, guid: 795e6b06824bb2a41b82da1b06df0876, type: 3}
+  baseHitEffect: {fileID: 3463157229188906966, guid: 47096eff328e11a418ace7db2d72aa97, type: 3}
+  deathEffect: {fileID: 3463157229188906966, guid: 47096eff328e11a418ace7db2d72aa97, type: 3}
+  dashEffect: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
+  jumpEffect: {fileID: 1429954232896169633, guid: 83036083a4ebcd34f98131bd3cf6f4d2, type: 3}
+  landingEffect: {fileID: 141433446842962269, guid: 9fe8f8b3288e45a44af36ff8aa04486e, type: 3}
+  critPhrases:
   - crit
   - wow
   - boom

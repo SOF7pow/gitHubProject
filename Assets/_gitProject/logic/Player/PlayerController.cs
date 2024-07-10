@@ -3,7 +3,9 @@ using _gitProject.logic.Components;
 using _gitProject.logic.Components.Labels;
 using _gitProject.logic.Events;
 using _gitProject.logic.Helper;
+using _gitProject.logic.ObjectsPool;
 using _gitProject.logic.Services;
+using _gitProject.logic.Storage;
 using _gitProject.logic.ViewCamera;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
@@ -13,6 +15,8 @@ namespace _gitProject.logic.Player {
     [RequireComponent(typeof(CharacterController),typeof(AudioSource))]
     public class PlayerController : MonoBehaviour, IService {
 
+        private GameObjectPool _popUpPool;
+        
         private Shoot _shoot;
         private Health _health;
         private Movement _movement;
@@ -24,8 +28,8 @@ namespace _gitProject.logic.Player {
         private VisualReaction _visualReaction;
         
         private Transform _muzzle;
-        private Transform _laserContainer;
         private LaserLabel _laser;
+        private Transform _laserContainer;
         
         private float _moveSpeed;
         private int _damage;
@@ -39,6 +43,9 @@ namespace _gitProject.logic.Player {
         [SerializeField,UnityEngine.Min(0)] private float _fireRate;
         [SerializeField,UnityEngine.Min(1)] private int _damageMultiplyerKoef;
         public void Initialize() {
+            var playerContainer = new GameObject().transform;
+            _popUpPool = new GameObjectPool(ServiceLocator.Current.Get<PrefabsStorage>().Storage.PopUpDamage, "PlayerContainer",5, playerContainer);
+            
             _muzzle ??= GetComponentInChildren<MuzzleLabel>().transform;
             _laserContainer ??= _muzzle.GetComponentInChildren<LaserContainerLabel>().transform;
             _moveSpeed = _startMoveSpeed;
@@ -51,15 +58,15 @@ namespace _gitProject.logic.Player {
             _inputHandler = new (transform, ServiceLocator.Current.Get<CameraBehaviour>().GetComponentInChildren<Camera>());
             _shoot = new (_muzzle, _fireRate, _damageMultiplyerKoef);
             _soundReaction = new(GetComponent<AudioSource>());
-            _visualReaction = new VisualReaction(transform);
+            _visualReaction = new VisualReaction(this, transform);
             
-            EventBus.Instance.OnCriticalShot += OnCriticalDamageReact;
+            EventsStorage.Instance.OnCriticalShot += OnCriticalDamageReact;
             _health.OnHealthChanged += _healthColorChanger.ChangeGradientColor;
             _movement.OnLanded += OnLandReact;
             StartCoroutine(UpdatePlayerPositionData());
         }
         private void OnDisable() {
-            EventBus.Instance.OnCriticalShot -= OnCriticalDamageReact;
+            EventsStorage.Instance.OnCriticalShot -= OnCriticalDamageReact;
             _health.OnHealthChanged -= _healthColorChanger.ChangeGradientColor;
             _movement.OnLanded -= OnLandReact;
             StopCoroutine(UpdatePlayerPositionData());
@@ -73,30 +80,32 @@ namespace _gitProject.logic.Player {
 
             if (_inputHandler.IsJump() && _movement.IsJumped(_jumpForce)) {
                 ResetStats();
-                _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.JumpSounds,1f);
-                _visualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.JumpEffect,1.5f);
+                _soundReaction.React(ServiceLocator.Current.Get<SoundsStorage>().Storage.JumpSounds,1f);
+                _visualReaction.EffectReact(ServiceLocator.Current.Get<PrefabsStorage>().Storage.JumpEffect,1.5f);
                 
                 var heal = Mathf.RoundToInt(_maxHealth * 0.2f);
                 _health.Regenerate(heal);
                 _healthColorChanger.ChangeGradientColor(_health.GetHealth);
-                _visualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.PopUpDamage, heal.ToString());
+                
+                _visualReaction.PopUpReact(_popUpPool, heal.ToString(), heal);
             }
             
             if (_inputHandler.IsDash() && _movement.IsDashed()) {
                 ResetStats();
-                _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.DashSounds,0.75f);
-                _visualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.DashEffect, 1.25f);
+                _soundReaction.React(ServiceLocator.Current.Get<SoundsStorage>().Storage.DashSounds,0.75f);
+                _visualReaction.EffectReact(ServiceLocator.Current.Get<PrefabsStorage>().Storage.DashEffect, 1.25f);
                 
                 var heal = Mathf.RoundToInt(_maxHealth * 0.5f);
                 _health.Regenerate(heal);
                 _healthColorChanger.ChangeGradientColor(_health.GetHealth);
-                _visualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.PopUpDamage,heal.ToString());
+                
+                _visualReaction.PopUpReact(_popUpPool, heal.ToString(), heal);
             }
             
             if (_inputHandler.IsShoot() && _shoot.IsShoot(_damage)) {
                 ChangeLaserLength();
                 DecreaseHealth(_health);
-                _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.ShootSounds,0.25f);
+                _soundReaction.React(ServiceLocator.Current.Get<SoundsStorage>().Storage.ShootSounds,0.25f);
             }
         }
         private void ChangeLaserLength() {
@@ -108,14 +117,14 @@ namespace _gitProject.logic.Player {
             else _laserContainer.localScale = Vector3.one;
         }
         private void OnCriticalDamageReact() {
-            var phrase = ServiceLocator.Current.Get<PrefabsData>().Storage.CritPhrases.GetRandom();
-            _visualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.PopUpDamage,phrase);
-            _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.CriticalShotSounds, 0.5f);
+            var phrase = ServiceLocator.Current.Get<PrefabsStorage>().Storage.CritPhrases.GetRandom();
+            _visualReaction.PopUpReact(_popUpPool,phrase, 10);
+            _soundReaction.React(ServiceLocator.Current.Get<SoundsStorage>().Storage.CriticalShotSounds, 0.5f);
         }
         private void ResetStats() {
             _moveSpeed = _startMoveSpeed;
             _damage = _startDamage;
-            _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.HealSounds,0.2f);
+            _soundReaction.React(ServiceLocator.Current.Get<SoundsStorage>().Storage.HealSounds,0.2f);
         }
         private void DecreaseHealth(Health health) {
             health.Reduce(_damage);
@@ -125,15 +134,15 @@ namespace _gitProject.logic.Player {
             }
         }
         private void OnLandReact() {
-            _visualReaction.React(ServiceLocator.Current.Get<PrefabsData>().Storage.LandingEffect,2f);
-            _soundReaction.React(ServiceLocator.Current.Get<SoundsData>().Storage.LandSounds, 1f);
-            EventBus.Instance.OnLanded?.Invoke();
+            _visualReaction.EffectReact(ServiceLocator.Current.Get<PrefabsStorage>().Storage.LandingEffect,2f);
+            _soundReaction.React(ServiceLocator.Current.Get<SoundsStorage>().Storage.LandSounds, 1f);
+            EventsStorage.Instance.OnLanded?.Invoke();
         }
         private IEnumerator UpdatePlayerPositionData() 
         {
             while (true) {
-                yield return new WaitForSeconds(0.25f);
-                EventBus.Instance.OnUpdatePlayerPositionData?.Invoke(transform.position);
+                yield return new WaitForSeconds(0.5f);
+                EventsStorage.Instance.OnUpdatePlayerPositionData?.Invoke(transform.position);
             }
         }
     }

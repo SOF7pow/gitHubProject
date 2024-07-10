@@ -33,7 +33,7 @@ Preset:
     value: 
     objectReference: {fileID: 5425343944376676598, guid: 5fe9d756ca87c994e9217cdfc9e68372, type: 3}
   - target: {fileID: 0}
-    propertyPath: EnemyController
+    propertyPath: enemyBehaviour
     value: 
     objectReference: {fileID: 8367662716639953051, guid: 40574fbe96e5e10408993fa02786fd15, type: 3}
   - target: {fileID: 0}

@@ -20,12 +20,13 @@ namespace _gitProject.logic.ViewCamera {
         public void Initialize(Transform target) {
             _target = target;
             _child = GetComponentInChildren<Camera>().transform;
-            EventBus.Instance.OnCriticalShot += ShakeCamera;
-            EventBus.Instance.OnLanded += ShakeCamera;
+            
+            EventsStorage.Instance.OnCriticalShot += ShakeCamera;
+            EventsStorage.Instance.OnLanded += ShakeCamera;
         }
         private void OnDisable() {
-            EventBus.Instance.OnCriticalShot -= ShakeCamera;
-            EventBus.Instance.OnLanded -= ShakeCamera;
+            EventsStorage.Instance.OnCriticalShot -= ShakeCamera;
+            EventsStorage.Instance.OnLanded -= ShakeCamera;
         }
         private void LateUpdate() => Follow(_target);
 

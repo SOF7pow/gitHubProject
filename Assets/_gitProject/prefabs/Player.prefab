@@ -453,11 +453,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _maxHealth: 100
   _startMoveSpeed: 20
-  _startDamage: 2
+  _startDamage: 1
   _jumpForce: 20
   _rotateSpeed: 20
-  _fireRate: 0.1
-  _damageMultiplyerKoef: 3
+  _fireRate: 0.2
+  _damageMultiplyerKoef: 5
 --- !u!82 &5395419171530042042
 AudioSource:
   m_ObjectHideFlags: 0
