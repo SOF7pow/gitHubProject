@@ -4,18 +4,30 @@ using _gitProject.logic.Interfaces;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace _gitProject.logic.Player {
+namespace _gitProject.logic.Components {
     public class Shoot {
-        
+
+        #region fields
+
         private const float Distance = Mathf.Infinity;
         private float _attackDelay;
         private float _lastAttackTime;
         private readonly int _damageMultiplierKoef;
         private readonly Transform _muzzle;
         private MeshRenderer _laserRenderer;
-        private readonly LayerMask _layer = LayerMask.NameToLayer("Damageable");
         private bool _canShoot = true;
+        private readonly LayerMask _layer = LayerMask.NameToLayer("Damageable");
+
+        #endregion
+
+        #region properties
+        
         public Vector3 HitPoint { get; private set; }
+        
+        #endregion
+
+        #region constructor
+
         public Shoot(Transform muzzle, float delay, int damageMultiplierKoef) {
             _muzzle = muzzle;
             _attackDelay = delay;
@@ -24,40 +36,55 @@ namespace _gitProject.logic.Player {
             _laserRenderer = _muzzle.GetComponentInChildren<LaserLabel>().GetComponent<MeshRenderer>();
             _laserRenderer.enabled = false;
         }
+
+        #endregion
+
+        #region public methods
+
         public bool IsShoot(int value) {
-            if (!_canShoot) return false;
+            if (!_canShoot) 
+                return false;
             _laserRenderer.enabled = true;
             TryHit(value);
             return true;
         }
+        public void Reload() {
+            if (_lastAttackTime < _attackDelay) 
+            {
+                _lastAttackTime += Time.deltaTime;
+                _canShoot = false;
+                if (_lastAttackTime > _attackDelay * 0.4f) _laserRenderer.enabled = false;
+            }
+            else
+                _canShoot = true;
+        }
+
+        #endregion
+
+        #region private methods
+
         private void TryHit(int value) {
             _lastAttackTime = 0;
             var position = _muzzle.position;
             var direction = _muzzle.forward;
             var ray = new Ray(position, direction);
-            if (!Physics.Raycast(ray, out var hit, Distance, ~_layer) || !hit.collider.TryGetComponent(out IDamageable damageable)) {
+            if (!Physics.Raycast(ray, out var hit, Distance, ~_layer) || !hit.collider.TryGetComponent(out IDamageable damageable)) 
+            {
                 HitPoint = Vector3.zero;
                 return;
             }
-            if (IsMultipleAttack()) {
+            if (IsMultipleAttack()) 
+            {
                 var criticalDamage = value * _damageMultiplierKoef;
                 damageable.TakeDamage(criticalDamage);
-                EventsStorage.Instance.OnCriticalShot?.Invoke();
+                EventBus.Instance.OnCriticalShot?.Invoke();
             }
-            else damageable.TakeDamage(value);
+            else 
+                damageable.TakeDamage(value);
             HitPoint = hit.point;
         }
+        private bool IsMultipleAttack() => Random.Range(1, 100) > 85;
 
-        public void Reload() {
-            if (_lastAttackTime < _attackDelay) {
-                _lastAttackTime += Time.deltaTime;
-                _canShoot = false;
-                if (_lastAttackTime > _attackDelay * 0.2f) _laserRenderer.enabled = false;
-            }
-            else {
-                _canShoot = true;
-            }
-        }
-        private bool IsMultipleAttack() => Random.Range(1, 100) > 50;
+        #endregion
     }
 }

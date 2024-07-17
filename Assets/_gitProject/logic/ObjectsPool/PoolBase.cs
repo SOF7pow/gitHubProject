@@ -18,9 +18,9 @@ namespace _gitProject.logic.ObjectsPool {
 
         #region constructor
 
-        public PoolBase(Func<T> preloadFunc, Action<T> getAction, Action<T> returnAction, int preloadCount, Transform container) {
-            
-            if (preloadFunc == null) {
+        protected PoolBase(Func<T> preloadFunc, Action<T> getAction, Action<T> returnAction, int preloadCount, Transform container) {
+            if (preloadFunc == null) 
+            {
                 throw new ArgumentException($"preload function is null");
             }
             
@@ -30,7 +30,7 @@ namespace _gitProject.logic.ObjectsPool {
             _container = container;
             
             //preload
-            for (int i = 0; i < preloadCount; i++)
+            for (var i = 0; i < preloadCount; i++)
                 Return(preloadFunc());
         }
 
@@ -53,6 +53,7 @@ namespace _gitProject.logic.ObjectsPool {
             foreach (var item in _active.ToArray()) 
                 Return(item);
         }
+        
         #endregion
     }
 }

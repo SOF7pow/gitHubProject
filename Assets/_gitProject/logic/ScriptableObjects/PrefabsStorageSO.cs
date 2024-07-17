@@ -1,12 +1,14 @@
-using _gitProject.logic.Enemies;
+using _gitProject.logic.EnemyLogic;
 using _gitProject.logic.Player;
 using _gitProject.logic.ViewCamera;
 using UnityEngine;
 
 namespace _gitProject.logic.ScriptableObjects {
     [CreateAssetMenu(menuName = "PrefabsStorageSO")]
-    public sealed class PrefabsStorageScriptableObject : ScriptableObject {
-        
+    public sealed class PrefabsStorageSO : ScriptableObject {
+
+        #region fields
+
         [Header("Logic")]
         [SerializeField] private CameraBehaviour cameraBehaviour;
         [SerializeField] private PlayerController playerController;
@@ -19,9 +21,14 @@ namespace _gitProject.logic.ScriptableObjects {
         [SerializeField] private GameObject dashEffect;
         [SerializeField] private GameObject jumpEffect;
         [SerializeField] private GameObject landingEffect;
+        
         [Space, Header("Phrases")]
         [SerializeField] private string[] critPhrases = {"crit", "wow", "boom","!!!"};
-        
+
+        #endregion
+
+        #region properties
+
         public CameraBehaviour CameraBehaviour => cameraBehaviour;
         public PlayerController PlayerController => playerController;
         public EnemyBehaviour EnemyBehaviour => enemyBehaviour;
@@ -34,6 +41,6 @@ namespace _gitProject.logic.ScriptableObjects {
         public GameObject LandingEffect => landingEffect;
         public string[] CritPhrases => critPhrases;
 
-
+        #endregion
     }
 }

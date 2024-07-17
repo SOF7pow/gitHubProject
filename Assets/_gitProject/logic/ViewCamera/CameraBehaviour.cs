@@ -6,29 +6,45 @@ using UnityEngine;
 namespace _gitProject.logic.ViewCamera {
     public class CameraBehaviour : MonoBehaviour, IService {
 
-        [SerializeField] private float maxOffsetYDistance;
-        [SerializeField] private float smoothSpeed;
-        [SerializeField] private Vector3 offset;
-        [Space]
-        [Header("Shaker")]
+        #region fields
+
+        private Transform _target;
+        private Transform _child;
+        [Header("Shaker settings")]
         [SerializeField] private float shakeDurationValue = 0.1f;
         [SerializeField] private float shakePosValue = 0.05f;
         [SerializeField] private float shakeRotValue = 0.05f;
-        
-        private Transform _target;
-        private Transform _child;
+        [Space]
+        [Header("Camera settings")]
+        [SerializeField] private float maxOffsetYDistance;
+        [SerializeField] private float smoothSpeed;
+        [SerializeField] private Vector3 offset;
+
+        #endregion
+
+        #region initialization
+
         public void Initialize(Transform target) {
             _target = target;
             _child = GetComponentInChildren<Camera>().transform;
             
-            EventsStorage.Instance.OnCriticalShot += ShakeCamera;
-            EventsStorage.Instance.OnLanded += ShakeCamera;
+            EventBus.Instance.OnCriticalShot += ShakeCamera;
+            EventBus.Instance.OnLanded += ShakeCamera;
         }
-        private void OnDisable() {
-            EventsStorage.Instance.OnCriticalShot -= ShakeCamera;
-            EventsStorage.Instance.OnLanded -= ShakeCamera;
-        }
+
+        #endregion
+
+        #region unity callbacks
+
         private void LateUpdate() => Follow(_target);
+        private void OnDisable() {
+            EventBus.Instance.OnCriticalShot -= ShakeCamera;
+            EventBus.Instance.OnLanded -= ShakeCamera;
+        }
+
+        #endregion
+
+        #region private methods
 
         private void Follow(Transform target) {
             if (!target) return;
@@ -44,5 +60,7 @@ namespace _gitProject.logic.ViewCamera {
             _child.transform.DOShakePosition(shakeDurationValue, shakePosValue);
             _child.transform.DOShakeRotation(shakeDurationValue, shakeRotValue);
         }
+
+        #endregion
     }
 }

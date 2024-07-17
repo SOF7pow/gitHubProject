@@ -2,24 +2,24 @@
 
 namespace _gitProject.logic.ObjectsPool {
     public class GameObjectPool : PoolBase<GameObject> {
+        
         #region constructor
-        public GameObjectPool(GameObject prefab, string parentName, int preloadCount, Transform container)
-            : base(() => Preload(prefab, parentName, container), GetAction, ReturnAction, preloadCount, container) {
+        public GameObjectPool(GameObject prefab, string containerName,Transform container, int preloadCount)
+            : base(() => Preload(prefab, containerName, container), 
+                GetAction, ReturnAction, preloadCount, container) {
         }
         #endregion
 
-        #region public methods
+        #region private methods
 
-        public static GameObject Preload(GameObject prefab, string containerName, Transform container) {
+        private static GameObject Preload(GameObject prefab, string containerName, Transform containerTransform) {
             var o = Object.Instantiate(prefab);
-            o.transform.parent = container;
-            container.name = containerName;
+            o.transform.parent = containerTransform;
+            containerTransform.name = containerName;
             return o;
         }
-
-        public static void GetAction(GameObject @object) => @object.SetActive(true);
-
-        public static void ReturnAction(GameObject @object) => @object.SetActive(false);
+        private static void GetAction(GameObject @object) => @object.SetActive(true);
+        private static void ReturnAction(GameObject @object) => @object.SetActive(false);
 
         #endregion
     }
