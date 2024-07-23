@@ -10,11 +10,11 @@ namespace _gitProject.logic.Components {
         #region fields
 
         private const float Distance = Mathf.Infinity;
-        private float _attackDelay;
+        private readonly float _attackDelay;
         private float _lastAttackTime;
         private readonly int _damageMultiplierKoef;
         private readonly Transform _muzzle;
-        private MeshRenderer _laserRenderer;
+        private readonly MeshRenderer _laserRenderer;
         private bool _canShoot = true;
         private readonly LayerMask _layer = LayerMask.NameToLayer("Damageable");
 

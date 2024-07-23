@@ -1,5 +1,6 @@
 using _gitProject.logic.EnemyLogic;
 using _gitProject.logic.Player;
+using _gitProject.logic.UI.Panels;
 using _gitProject.logic.ViewCamera;
 using UnityEngine;
 
@@ -13,6 +14,9 @@ namespace _gitProject.logic.ScriptableObjects {
         [SerializeField] private CameraBehaviour cameraBehaviour;
         [SerializeField] private PlayerController playerController;
         [SerializeField] private EnemyBehaviour enemyBehaviour;
+
+        [Space, Header("Effects")] 
+        [SerializeField] private MenuSwitcher menuUI;
         
         [Space, Header("Effects")]
         [SerializeField] private GameObject popUpDamage;
@@ -32,6 +36,7 @@ namespace _gitProject.logic.ScriptableObjects {
         public CameraBehaviour CameraBehaviour => cameraBehaviour;
         public PlayerController PlayerController => playerController;
         public EnemyBehaviour EnemyBehaviour => enemyBehaviour;
+        public MenuSwitcher MenuUI => menuUI;
         public GameObject PopUpDamage => popUpDamage;
         public GameObject BaseHitEffect => baseHitEffect;
         

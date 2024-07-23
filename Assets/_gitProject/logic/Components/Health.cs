@@ -34,7 +34,7 @@ namespace _gitProject.logic.Components {
             OnDied?.Invoke();
         }
         
-        public void Regenerate(int value) {
+        public void Increase(int value) {
             if (GetHealth + value > _startHealth) GetHealth = _startHealth;
             else GetHealth += value;
         }

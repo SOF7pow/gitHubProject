@@ -2,6 +2,7 @@
 
 namespace _gitProject.logic.Components {
     public class MouseLook {
+        
         #region fields
 
         private readonly float _rotateSpeed;

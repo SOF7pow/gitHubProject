@@ -20,16 +20,16 @@ namespace _gitProject.logic.ViewCamera {
         [SerializeField] private float smoothSpeed;
         [SerializeField] private Vector3 offset;
 
+        
         #endregion
 
         #region initialization
 
-        public void Initialize(Transform target) {
+        public void Init(Transform target) {
             _target = target;
             _child = GetComponentInChildren<Camera>().transform;
             
-            EventBus.Instance.OnCriticalShot += ShakeCamera;
-            EventBus.Instance.OnLanded += ShakeCamera;
+           Enable();
         }
 
         #endregion
@@ -37,15 +37,22 @@ namespace _gitProject.logic.ViewCamera {
         #region unity callbacks
 
         private void LateUpdate() => Follow(_target);
-        private void OnDisable() {
-            EventBus.Instance.OnCriticalShot -= ShakeCamera;
-            EventBus.Instance.OnLanded -= ShakeCamera;
-        }
+        private void OnDisable() => Dispose();
 
         #endregion
 
         #region private methods
 
+        private void  Enable() {
+            EventBus.Instance.OnCriticalShot += ShakeCamera;
+            EventBus.Instance.OnLanded += ShakeCamera;
+        }
+
+        private void Dispose() {
+            EventBus.Instance.OnCriticalShot -= ShakeCamera;
+            EventBus.Instance.OnLanded -= ShakeCamera;
+        }
+        
         private void Follow(Transform target) {
             if (!target) return;
             var scroll = Input.mouseScrollDelta.y * 1.1f;

@@ -29,7 +29,7 @@ namespace _gitProject.logic.EnemyLogic {
 
         #region initialization
 
-        public void Initialize(
+        public void Init(
             GameObjectPool popUpPool, 
             GameObjectPool hitPool, 
             SoundsStorage soundsStorage) 
@@ -81,7 +81,6 @@ namespace _gitProject.logic.EnemyLogic {
             _health.OnDied += DestroySelf;
             
             EventBus.Instance.OnUpdatePlayerPositionData += _positionFollower.UpdateTargetPosition;
-            
             EventBus.Instance.OnGameStart += OnStartGame;
             EventBus.Instance.OnGamePause += OnPauseGame;
             EventBus.Instance.OnGameResume += OnResumeGame;
@@ -94,7 +93,6 @@ namespace _gitProject.logic.EnemyLogic {
             _health.OnDied -= DestroySelf;
             
             EventBus.Instance.OnUpdatePlayerPositionData -= _positionFollower.UpdateTargetPosition;
-            
             EventBus.Instance.OnGameFinish -= OnStartGame;
             EventBus.Instance.OnGamePause -= OnPauseGame;
             EventBus.Instance.OnGameResume -= OnResumeGame;

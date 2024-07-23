@@ -19,24 +19,18 @@ namespace _gitProject.logic.ObjectsPool {
         #region constructor
 
         protected PoolBase(Func<T> preloadFunc, Action<T> getAction, Action<T> returnAction, int preloadCount, Transform container) {
-            if (preloadFunc == null) 
-            {
-                throw new ArgumentException($"preload function is null");
-            }
-            
-            _preloadFunc = preloadFunc;
+            _preloadFunc = preloadFunc ?? throw new ArgumentException($"preload function is null");
             _getAction = getAction;
             _returnAction = returnAction;
             _container = container;
             
-            //preload
             for (var i = 0; i < preloadCount; i++)
                 Return(preloadFunc());
         }
 
         #endregion
 
-        #region piblic methods
+        #region public methods
 
         public T Get() {
             T item = _pool.Count > 0 ? _pool.Dequeue() : _preloadFunc();
@@ -44,11 +38,13 @@ namespace _gitProject.logic.ObjectsPool {
             _active.Add(item);
             return item;
         }
+        
         public void Return(T item) {
             _returnAction(item);
             _pool.Enqueue(item);
             _active.Remove(item);
         }
+        
         public void ReturnAll() {
             foreach (var item in _active.ToArray()) 
                 Return(item);

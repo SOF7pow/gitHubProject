@@ -17,7 +17,7 @@ namespace _gitProject.logic.Player {
     public class PlayerController : MonoBehaviour, IService, IHealeable {
 
         #region fields
-
+        
         [SerializeField, UnityEngine.Min(1)] private int maxHealth = 100;
         [SerializeField, UnityEngine.Min(1), Max(20)] private int startMoveSpeed = 10;
         [SerializeField, UnityEngine.Min(1), Max(20)] private int startDamage = 1;
@@ -25,7 +25,6 @@ namespace _gitProject.logic.Player {
         [SerializeField,UnityEngine.Min(0)] private float rotateSpeed;
         [SerializeField,UnityEngine.Min(0)] private float fireRate;
         [SerializeField,UnityEngine.Min(1)] private int damageMultiplyerKoef;
-        
         
         private GameObjectPool _popUpPool;
         private Shoot _shoot;
@@ -47,7 +46,7 @@ namespace _gitProject.logic.Player {
 
         #region initialization
 
-        public void Initialize() {
+        public void Init() {
             _popUpPool = new GameObjectPool(ServiceLocator.Current.Get<PrefabsStorage>().Storage.PopUpDamage, 
                 "PlayerContainer", new GameObject().transform,5);
             
@@ -65,36 +64,22 @@ namespace _gitProject.logic.Player {
             _soundReaction = new(GetComponent<AudioSource>());
             _visualReaction = new VisualReaction(this, transform);
             
-            _health.OnHealthChanged += _colorChanger.ChangeGradientColor;
-            _movement.OnLanded += OnLandReact;
-            
-            EventBus.Instance.OnCriticalShot += OnCriticalDamageReact;
-            EventBus.Instance.OnGameStart += OnStartGame;
-            EventBus.Instance.OnGamePause += OnPauseGame;
-            EventBus.Instance.OnGameResume += OnResumeGame;
-            EventBus.Instance.OnGameFinish += OnFinishGame;
-            
-            StartCoroutine(UpdatePlayerPositionData());
+            Enable();
         }
+
+        
 
         #endregion
         
         #region unity callbacks
         private void OnDisable() {
-            _health.OnHealthChanged -= _colorChanger.ChangeGradientColor;
-            _movement.OnLanded -= OnLandReact;
-            
-            EventBus.Instance.OnCriticalShot -= OnCriticalDamageReact;
-            
-            EventBus.Instance.OnGameStart -= OnStartGame;
-            EventBus.Instance.OnGamePause = OnPauseGame;
-            EventBus.Instance.OnGameResume -= OnResumeGame;
-            EventBus.Instance.OnGameFinish -= OnFinishGame;
-            
-            StopCoroutine(UpdatePlayerPositionData());
+            Dispose();
         }
+
+       
+
         private void Update() {
-            if (_isActive == false) return;
+            if (!_isActive) return;
             
             var moveDirection = _inputHandler.CalculateMoveDirection();
             var lookDirection = _inputHandler.CalculateLookDirection();
@@ -107,8 +92,10 @@ namespace _gitProject.logic.Player {
                 ResetStats();
                 _soundReaction.React(ServiceLocator.Current.Get<SoundsStorage>().Storage.JumpSounds,1f);
                 _visualReaction.EffectReact(ServiceLocator.Current.Get<PrefabsStorage>().Storage.JumpEffect,1.5f);
+                
                 var heal = Mathf.RoundToInt(maxHealth * 0.2f);
                 Heal(heal);
+                
                 _colorChanger.ChangeGradientColor(_health.GetHealth);
                 _visualReaction.PopUpReact(_popUpPool, heal.ToString(), heal);
             }
@@ -118,8 +105,10 @@ namespace _gitProject.logic.Player {
                 ResetStats();
                 _soundReaction.React(ServiceLocator.Current.Get<SoundsStorage>().Storage.DashSounds,0.75f);
                 _visualReaction.EffectReact(ServiceLocator.Current.Get<PrefabsStorage>().Storage.DashEffect, 1.25f);
+                
                 var heal = Mathf.RoundToInt(maxHealth * 0.5f);
                 Heal(heal);
+                
                 _colorChanger.ChangeGradientColor(_health.GetHealth);
                 _visualReaction.PopUpReact(_popUpPool, heal.ToString(), heal);
             }
@@ -135,15 +124,42 @@ namespace _gitProject.logic.Player {
 
         #region public methods
 
-        public void OnStartGame() => _isActive = true;
-        public void OnPauseGame() => _isActive = false;
-        public void OnResumeGame() => _isActive = true;
-        public void OnFinishGame() => _isActive = false;
-        public void Heal(int amount) => _health.Regenerate(amount);
+        private void OnStartGame() => _isActive = true;
+        private void OnPauseGame() => _isActive = false;
+        private void OnResumeGame() => _isActive = true;
+        private void OnFinishGame() => _isActive = false;
+        public void Heal(int amount) => _health.Increase(amount);
 
         #endregion
         
         #region private methods
+        
+        private void Enable() {
+            _health.OnHealthChanged += _colorChanger.ChangeGradientColor;
+            _movement.OnLanded += OnLandReact;
+
+            EventBus.Instance.OnCriticalShot += OnCriticalDamageReact;
+            EventBus.Instance.OnGameStart += OnStartGame;
+            EventBus.Instance.OnGamePause += OnPauseGame;
+            EventBus.Instance.OnGameResume += OnResumeGame;
+            EventBus.Instance.OnGameFinish += OnFinishGame;
+
+            StartCoroutine(UpdatePlayerPositionData());
+        }
+        
+        private void Dispose() {
+            _health.OnHealthChanged -= _colorChanger.ChangeGradientColor;
+            _movement.OnLanded -= OnLandReact;
+
+            EventBus.Instance.OnCriticalShot -= OnCriticalDamageReact;
+
+            EventBus.Instance.OnGameStart -= OnStartGame;
+            EventBus.Instance.OnGamePause -= OnPauseGame;
+            EventBus.Instance.OnGameResume -= OnResumeGame;
+            EventBus.Instance.OnGameFinish -= OnFinishGame;
+
+            StopCoroutine(UpdatePlayerPositionData());
+        }
 
         private void ChangeLaserLength() {
             if (_shoot.HitPoint != Vector3.zero) 
@@ -154,16 +170,19 @@ namespace _gitProject.logic.Player {
             }
             else _laserContainer.localScale = Vector3.one;
         }
+        
         private void OnCriticalDamageReact() {
             var randomPhrase = ServiceLocator.Current.Get<PrefabsStorage>().Storage.CritPhrases.GetRandom();
             _visualReaction.PopUpReact(_popUpPool, randomPhrase, 10);
             _soundReaction.React(ServiceLocator.Current.Get<SoundsStorage>().Storage.CriticalShotSounds, 0.5f);
         }
+        
         private void ResetStats() {
             _moveSpeed = startMoveSpeed;
             _damage = startDamage;
             _soundReaction.React(ServiceLocator.Current.Get<SoundsStorage>().Storage.HealSounds,0.2f);
         }
+        
         private void DecreaseHealth(Health health) {
             health.Reduce(_damage);
             if (health.GetHealth < 1) 
@@ -172,11 +191,13 @@ namespace _gitProject.logic.Player {
                 _damage = startDamage * damageMultiplyerKoef;
             }
         }
+        
         private void OnLandReact() {
             _visualReaction.EffectReact(ServiceLocator.Current.Get<PrefabsStorage>().Storage.LandingEffect,2f);
             _soundReaction.React(ServiceLocator.Current.Get<SoundsStorage>().Storage.LandSounds, 1f);
-            EventBus.Instance.OnLanded?.Invoke();
+           EventBus.Instance.OnLanded?.Invoke();
         }
+        
         private IEnumerator UpdatePlayerPositionData() 
         {
             while (this) 
@@ -187,6 +208,5 @@ namespace _gitProject.logic.Player {
         }
 
         #endregion
-
     }
 }

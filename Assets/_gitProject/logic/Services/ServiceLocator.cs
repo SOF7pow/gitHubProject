@@ -8,7 +8,7 @@ namespace _gitProject.logic.Services {
         private readonly Dictionary<Type, IService> _services = new();
         private ServiceLocator() {}
         public static ServiceLocator Current { get; private set; }
-        public static void Initialize() => Current = new ServiceLocator();
+        public static void Init() => Current = new ServiceLocator();
 
         #region public methods
 

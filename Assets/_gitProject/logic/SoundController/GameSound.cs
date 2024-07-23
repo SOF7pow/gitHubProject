@@ -5,28 +5,43 @@ using UnityEngine;
 
 namespace _gitProject.logic.SoundController {
     public class GameSound {
-        
+
+        #region fields
+
         private readonly SoundsStorage _soundsStorage;
         private AudioSource _audioSource;
-        private readonly EventBus _eventBus;
-        
-        public GameSound(EventBus eventBus, SoundsStorage soundsStorage) 
+
+        #endregion
+
+        #region constructor
+
+        public GameSound(SoundsStorage soundsStorage) 
         {
-            _eventBus = eventBus;
             _soundsStorage = soundsStorage;
             
             Enable();   
         }
-        private void Enable() {
-            _eventBus.OnMenu += PlaySoundMenu;
-            _eventBus.OnMenuButtonClick += PlaySoundMenu;
-        }
-        // must be called before the parent container is destroyed
+
+        #endregion
+
+        #region public methods
+
         public void Dispose() {
-            _eventBus.OnMenu -= PlaySoundMenu;
-            _eventBus.OnMenuButtonClick -= PlaySoundMenu;
+            EventBus.Instance.OnMenu -= PlaySoundMenu;
+            EventBus.Instance.OnMenuButtonClick -= PlaySoundMenu;
+        }
+
+        #endregion
+
+        #region private methods
+
+        private void Enable() {
+            EventBus.Instance.OnMenu += PlaySoundMenu;
+            EventBus.Instance.OnMenuButtonClick += PlaySoundMenu;
         }
         private void PlaySoundMenu() => AudioSource.PlayClipAtPoint(
-            _soundsStorage.Storage.HealSounds.GetRandom(),Vector3.zero);
+            _soundsStorage.Storage.HitSounds.GetRandom(),Vector3.zero);
+
+        #endregion
     }
 }

@@ -5,6 +5,7 @@ namespace _gitProject.logic.ScriptableObjects {
     public sealed class SoundsStorageSO : ScriptableObject {
         
         #region fields
+        
         [SerializeField] private AudioClip[] _hitSounds;
         [SerializeField] private AudioClip[] _shootSounds;
         [SerializeField] private AudioClip[] _dieSounds;
@@ -13,6 +14,7 @@ namespace _gitProject.logic.ScriptableObjects {
         [SerializeField] private AudioClip[] _jumpSounds;
         [SerializeField] private AudioClip[] _healSounds;
         [SerializeField] private AudioClip[] _landSounds;
+        
         #endregion
         
         #region properties
